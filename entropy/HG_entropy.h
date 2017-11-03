@@ -1,5 +1,5 @@
-#ifndef _entropy_H
-#define _entropy_H
+#ifndef _HG_entropy_H
+#define _HG_entropy_H
 
 #include <cmath>
 #include <cstdio>
@@ -10,27 +10,25 @@
 #include <cstring>
 #include "BOBHASH32.h"
 #include "BOBHASH64.h"
-#define HK_d 1
 #define HK_b 1.08
 #define G 8
-#define fp 17
-#define ct 32
+#define ct 32  // the number of cold items for each bucket
 using namespace std;
-class entropy
+class HG_entropy
 {
     private:
-        BOBHash32 * bobhash[HK_d+2];
+        BOBHash32 * bobhash;
         int M;
     public:
         struct node {int C,FP;} HK[2000005][20];
         int ext[2000005][40];
         double entro;
-        entropy(int M,int prm):M(M) {entro=0; for (int i=0; i<HK_d+2; i++) bobhash[i]=new BOBHash32(i+prm);}
+        HG_entropy(int M,int prm):M(M) {entro=0; bobhash=new BOBHash32(prm);}
         void Insert(string x)
         {
-            int FP=(bobhash[0]->run(x.c_str(),x.size())) % (1<<fp);
+            unsigned int H=bobhash->run(x.c_str(),x.size());
+            unsigned int FP=(H>>16),Hsh=H % M;
             bool FLAG=false;
-            int Hsh=(bobhash[0]->run(x.c_str(),x.size()))%M;
             for (int k=0; k<G; k++)
             {
                 int c=HK[Hsh][k].C;
@@ -63,7 +61,7 @@ class entropy
                         HK[Hsh][X].C=1;
                     } else
                     {
-                        int p=bobhash[1]->run(x.c_str(),x.size()) % ct;
+                        int p=Hsh % ct;
                         if (ext[Hsh][p]) entro-=ext[Hsh][p]*log(ext[Hsh][p])/log(2);
                         if (ext[Hsh][p]<16) ext[Hsh][p]++;
                         entro+=ext[Hsh][p]*log(ext[Hsh][p])/log(2);
@@ -73,15 +71,14 @@ class entropy
         }
         int Query(string x)
         {
-            int FP=(bobhash[0]->run(x.c_str(),x.size()))  % (1<<fp);
-            int Hsh=(bobhash[0]->run(x.c_str(),x.size()))%M;
+            unsigned int H=bobhash->run(x.c_str(),x.size());
+            unsigned int FP=(H>>16),Hsh=H % M;
             for (int k=0; k<G; k++)
             {
                 int c=HK[Hsh][k].C;
                 if (HK[Hsh][k].FP==FP) return max(1,HK[Hsh][k].C);
             }
-            int p=bobhash[1]->run(x.c_str(),x.size()) % ct;
-            //return 1;
+            int p=Hsh % ct;
             return max(1,ext[Hsh][p]);
         }
 };
