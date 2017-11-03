@@ -1,0 +1,7 @@
+# HeavyGuardian
+
+## Introduction
+
+Approximate stream processing algorithms, such as Count-Min sketch, Space-Saving, etc., support numerous applications in databases, storage systems, networking, and other domains. Unfortunately, because of the unbalanced distribution in real data streams, existing algorithms can hardly achieve small memory usage, fast processing speed, and high accuracy at the same time. To address this gap, we propose a meta-framework, called Cold Filter (CF), that enables faster and more accurate stream processing.
+
+Different from existing filters that mainly focus on hot items, our filter captures cold items in the first stage, and hot items in the second stage. Also, existing filters require two-direction communication ¨C with frequent exchanges between the two stages; our filter on the other hand is one-direction ¨C each item enters one stage at most once. Our filter can accurately estimate both cold and hot items, giving it a genericity that makes it applicable to many stream processing tasks. To illustrate the benefits of our filter, we deploy it on three typical stream processing tasks and experimental results show speed improvements of up to 4.7 times, and accuracy improvements of up to 51 times.
